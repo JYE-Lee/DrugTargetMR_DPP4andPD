@@ -80,7 +80,6 @@ hb_single_list <- list()
 # 2-1: Using eQTL data as exposure =============================================
 ## T2DM
 dm_all2 <- read.table("../../../gwas/DIAMANTE-EUR.sumstat.txt", sep=" ", header=T) 
-##dm_all2 <- read.table("../../gwas/dm_qtl.txt", sep=" ", header=T) 
 dm_all2 <- dm_all2[,c("rsID","chromosome.b37.","position.b37.","Fixed.effects_beta","Fixed.effects_SE",
                     "effect_allele","other_allele","effect_allele_frequency","Fixed.effects_p.value")]
 names(dm_all2) <- c("SNP","chr.outcome","pos.outcome","beta.outcome","se.outcome",
@@ -88,10 +87,7 @@ names(dm_all2) <- c("SNP","chr.outcome","pos.outcome","beta.outcome","se.outcome
 dm_all2$id.outcome <- "T2DM (DIAMANTE)"; dm_all2$outcome <- "T2DM (DIAMANTE)"
 dm_all2$samplesize.outcome <- 80154 + 853816
 
-##eqtl_dm <- extract_outcome_data(eqtl_clumped$SNP, outcomes="ieu-a-24", proxies=TRUE) # no snps at all
-##eqtl_dm <- extract_outcome_data(eqtl_clumped$SNP, outcomes="ebi-a-GCST90018926", proxies=TRUE) # U+F
 eqtl_dm <- harmonise_data (eqtl_clumped, eqtl_dm, action=3)
-#eqtl_dm <- harmonise_data (eqtl_clumped, dm_all2, action=2)
 eqtl_dm <- eqtl_dm[eqtl_dm$mr_keep==TRUE,]
 
 dm_mr_list[['eQTL']] <- mr(eqtl_dm, method_list=c("mr_ivw","mr_weighted_median", "mr_weighted_mode", "mr_egger_regression"))
@@ -115,47 +111,8 @@ dm_single_list[['eQTL']] <- mr_singlesnp(eqtl_dm, all_method = c("mr_ivw"))
 
 dm_hetero_list #0.1712581
 
-# male
-dmM <- read.table("../../../gwas/DIAGRAM.Morris2012.SexSpecific.2016JUL05/DIAGRAM.Morris2012.males.txt", sep="\t", header=T)
-dmM$beta <- log(dmM$OR.EFFECT_ALLELE.)
-dmM$se <- (log(dmM$OR_95U) - log(dmM$OR_95L)) / (2 * 1.96)
-dmM <- dmM[,c("ID","CHROMOSOME","POSITION","beta","se",
-              "EFFECT_ALLELE","OTHER_ALLELE","P_VALUE")]
-names(dmM) <- c("SNP","chr.outcome","pos.outcome","beta.outcome","se.outcome",
-                "effect_allele.outcome","other_allele.outcome","pval.outcome")
-dmM$samplesize.outcome <- 20219 + 54604
-dmM$eaf.outcome <- 0.5
-dmM$id.outcome <- "dmM"
-dmM$outcome <- "dmM"
-
-#eqtl_dmM <- harmonise_data (eqtl_clumped, dmM, action=2)
-#eqtl_dmM <- eqtl_dmM[eqtl_dmM$mr_keep==TRUE,]; nrow(eqtl_dmM) #0
-
-#dm_mr_list[['eQTL_dmM']] <- mr(eqtl_dmM, method_list=c("mr_ivw","mr_weighted_median", "mr_weighted_mode", "mr_egger_regression"))
-#presso <- mr_presso(BetaOutcome="beta.outcome",BetaExposure="beta.exposure",SdOutcome="se.outcome",
-#                    SdExposure="se.exposure",SignifThreshold=0.05,OUTLIERtest=TRUE,DISTORTIONtest=TRUE,data=eqtl_dmM)$`Main MR results`[1, ]
-#if (!all(is.na(presso[2, c("Causal Estimate", "Sd", "P-value")]))) {
-#  res.presso <- presso[2, ]
-#  method.presso <- "MR-PRESSO"
-#} else {
-#  res.presso <- presso[1, ]
-#  method.presso <- "MR-PRESSO"
-#}
-#df.presso <- data.frame(
-#  id.exposure = unique(eqtl_dmM$id.exposure), id.outcome = unique(eqtl_dmM$id.outcome), outcome = unique(eqtl_dmM$outcome), exposure = unique(eqtl_dmM$exposure),
-#  method = method.presso, nsnp = nrow(eqtl_dmM), b = res.presso$`Causal Estimate`, se = res.presso$Sd, pval = res.presso$`P-value`
-#)
-#dm_mr_list[['eQTL_dmM']] <- rbind(dm_mr_list$eQT_dmML, df.presso)
-#dm_hetero_list[['eQTL_dmM']] <- mr_heterogeneity(eqtl_dmM)
-#dm_pleio_list[['eQTL_dmM']] <- mr_pleiotropy_test(eqtl_dmM)
-#dm_single_list[['eQTL_dmM']] <- mr_singlesnp(eqtl_dmM, all_method = c("mr_ivw"))
-
-
 ## HbA1c
-##eqtl_hb <- extract_outcome_data(eqtl_clumped$SNP, outcomes="ebi-a-GCST90018958", proxies=TRUE) # U + F
-##eqtl_hb <- harmonise_data (eqtl_clumped, eqtl_hb, action=2)
-#hb_all2 <- read.table("../../gwas/MAGIC1000G_HbA1c_EUR.tsv", sep="\t", header=T) 
-hb_all2 <- read.table("../../../gwas/hb_qtl.txt", sep="\t", header=T) 
+hb_all2 <- read.table("../../gwas/MAGIC1000G_HbA1c_EUR.tsv", sep="\t", header=T) 
 hb_all2 <- hb_all2[,c("variant","chromosome","base_pair_location","beta","standard_error",
                       "effect_allele","other_allele","effect_allele_frequency","p_value","sample_size")]
 names(hb_all2) <- c("SNP","chr.outcome","pos.outcome","beta.outcome","se.outcome",
@@ -188,8 +145,6 @@ hb_hetero_list #eQTL: 0.6001620
 
 # 2-2: Using cis-pQTL data as exposure =========================================
 ## T2DM
-#pqtl_dm <- extract_outcome_data(pqtl_clumped$SNP, outcomes="ebi-a-GCST90018926", proxies=TRUE)
-#pqtl_dm <- harmonise_data (pqtl_clumped, pqtl_dm, action=2)
 pqtl_dm <- harmonise_data (pqtl_clumped, dm_all2, action=2)
 pqtl_dm <- pqtl_dm[pqtl_dm$mr_keep==TRUE,]
 
@@ -213,37 +168,7 @@ dm_pleio_list[['pQTL']] <- mr_pleiotropy_test(pqtl_dm)
 dm_single_list[['pQTL']] <- mr_singlesnp(pqtl_dm, all_method = c("mr_ivw"))
 
 dm_hetero_list
-# pQTL: 0.08135981 >> if outliers detected,
-
-# skip (outlier removal)
-res <- dm_mr_list[['pQTL']]
-#mr_scatter_plot(res,pqtl_dm)
-a_radial <- format_radial(pqtl_dm$beta.exposure,pqtl_dm$beta.outcome,pqtl_dm$se.exposure,pqtl_dm$se.outcome,pqtl_dm$SNP)
-ivw <- ivw_radial(a_radial,0.05,1,0.001)
-#plot_radial(ivw,T,T,T)
-outlier <- as.character(ivw$outliers$SNP); length(outlier)
-pqtl_dm_noOut <-pqtl_dm[!pqtl_dm$SNP %in% outlier,]
-dm_mr_list[['pQTL']] <- mr(pqtl_dm_noOut, method_list=c("mr_ivw","mr_weighted_median", "mr_weighted_mode", "mr_egger_regression"))
-presso <- mr_presso(BetaOutcome="beta.outcome",BetaExposure="beta.exposure",SdOutcome="se.outcome",
-                    SdExposure="se.exposure",SignifThreshold=0.05,OUTLIERtest=TRUE,DISTORTIONtest=TRUE,data=pqtl_dm_noOut)$`Main MR results`[1, ]
-if (!all(is.na(presso[2, c("Causal Estimate", "Sd", "P-value")]))) {
-  res.presso <- presso[2, ]
-  method.presso <- "MR-PRESSO"
-} else {
-  res.presso <- presso[1, ]
-  method.presso <- "MR-PRESSO"
-}
-df.presso <- data.frame(
-  id.exposure = unique(pqtl_dm_noOut$id.exposure), id.outcome = unique(pqtl_dm_noOut$id.outcome), outcome = unique(pqtl_dm_noOut$outcome), exposure = unique(pqtl_dm_noOut$exposure),
-  method = method.presso, nsnp = nrow(pqtl_dm_noOut), b = res.presso$`Causal Estimate`, se = res.presso$Sd, pval = res.presso$`P-value`
-)
-dm_mr_list[['pQTL']] <- rbind(dm_mr_list$pQTL, df.presso)
-dm_hetero_list[['pQTL']] <- mr_heterogeneity(pqtl_dm_noOut)
-dm_pleio_list[['pQTL']] <- mr_pleiotropy_test(pqtl_dm_noOut)
-dm_single_list[['pQTL']] <- mr_singlesnp(pqtl_dm_noOut, all_method = c("mr_ivw"))
-
-# check
-dm_hetero_list # pQTL: 0.08135981
+# pQTL: 0.08135981
 
 # male
 dmM <- read.table("../../../gwas/DIAGRAM.Morris2012.SexSpecific.2016JUL05/DIAGRAM.Morris2012.males.txt", sep="\t", header=T)
@@ -283,7 +208,6 @@ dm_single_list[['pQTL_dmM']] <- mr_singlesnp(pqtl_dmM, all_method = c("mr_ivw"))
 dm_hetero_list
 
 ## HbA1c
-#pqtl_hb <- extract_outcome_data(pqtl_clumped$SNP, outcomes="ebi-a-GCST90018958", proxies=TRUE)
 pqtl_hb <- harmonise_data (pqtl_clumped, hb_all2, action=2)
 pqtl_hb <- pqtl_hb[pqtl_hb$mr_keep==TRUE,]
 
@@ -307,37 +231,6 @@ hb_pleio_list[['pQTL']] <- mr_pleiotropy_test(pqtl_hb)
 hb_single_list[['pQTL']] <- mr_singlesnp(pqtl_hb, all_method = c("mr_ivw"))
 
 hb_hetero_list #pQTL: 0.2326634
-
-# skip
-res <- hb_mr_list[['pQTL']]
-#mr_scatter_plot(res,pqtl_hb)
-a_radial <- format_radial(pqtl_hb$beta.exposure,pqtl_hb$beta.outcome,pqtl_hb$se.exposure,pqtl_hb$se.outcome,pqtl_hb$SNP)
-ivw <- ivw_radial(a_radial,0.05,1,0.001)
-#plot_radial(ivw,T,T,T)
-outlier <- as.character(ivw$outliers$SNP); length(outlier)
-pqtl_hb_noOut <-pqtl_hb[!pqtl_hb$SNP %in% outlier,]
-hb_mr_list[['pQTL']] <- mr(pqtl_hb_noOut, method_list=c("mr_ivw","mr_weighted_median", "mr_weighted_mode", "mr_egger_regression"))
-presso <- mr_presso(BetaOutcome="beta.outcome",BetaExposure="beta.exposure",SdOutcome="se.outcome",
-                    SdExposure="se.exposure",SignifThreshold=0.05,OUTLIERtest=TRUE,DISTORTIONtest=TRUE,data=pqtl_hb_noOut)$`Main MR results`[1, ]
-if (!all(is.na(presso[2, c("Causal Estimate", "Sd", "P-value")]))) {
-  res.presso <- presso[2, ]
-  method.presso <- "MR-PRESSO"
-} else {
-  res.presso <- presso[1, ]
-  method.presso <- "MR-PRESSO"
-}
-df.presso <- data.frame(
-  id.exposure = unique(pqtl_hb_noOut$id.exposure), id.outcome = unique(pqtl_hb_noOut$id.outcome), outcome = unique(pqtl_hb_noOut$outcome), exposure = unique(pqtl_hb_noOut$exposure),
-  method = method.presso, nsnp = nrow(pqtl_hb_noOut), b = res.presso$`Causal Estimate`, se = res.presso$Sd, pval = res.presso$`P-value`
-)
-hb_mr_list[['pQTL']] <- rbind(hb_mr_list$pQTL, df.presso)
-hb_hetero_list[['pQTL']] <- mr_heterogeneity(pqtl_hb_noOut)
-hb_pleio_list[['pQTL']] <- mr_pleiotropy_test(pqtl_hb_noOut)
-hb_single_list[['pQTL']] <- mr_singlesnp(pqtl_hb_noOut, all_method = c("mr_ivw"))
-
-# check
-hb_hetero_list
-# pqtl: 0.2326634
 
 write.csv(do.call(rbind, dm_mr_list), file="dm_mr.csv", row.names = FALSE, na = "")
 write.csv(do.call(rbind, dm_pleio_list), file="dm_pleio.csv", row.names = FALSE, na = "")
@@ -509,31 +402,6 @@ pqtl_in_pd_clumped <- clump_data(pqtl_in_pd, clump_r2=0.1); nrow(pqtl_in_pd_clum
 pqtl_pd <- pd %>%
   filter(SNP %in% pqtl_in_pd_clumped$SNP)
 
-#pqtl_pd <- pd %>%
-#  filter(SNP %in% pqtl_clumped$SNP)
-#nrow(pqtl_pd) #38
-#pqtl_clumped$SNP[!pqtl_clumped$SNP %in% pd$SNP]
-#"rs373442750" >> no proxy (rsq>0.8)
-#"rs35635667" (C/A) >> rs2268889 was taken (rsq=0.987, T/C)
-#"rs185584271" (T/C) >> rs78998339 (rsq=0.9279, T/A, eaf.outcome= T 0.0223, dbSNP T=0.0074)
-#pqtl_pd_proxy <- pd %>%
-#  filter(SNP %in% c("rs2268889","rs78998339"))
-# Mapping proxy SNPs back to the original SNPs
-#proxy_map <- data.frame(
-#  proxy_snp = c("rs2268889", "rs78998339"), original_snp = c("rs35635667", "rs185584271"), 
-#  proxy_effect = c("T", "T"), proxy_other  = c("C", "A"),
-#  original_effect = c("C", "T"), original_other  = c("A", "C")
-#)
-#pqtl_pd_proxy2 <- pqtl_pd_proxy %>%
-#  left_join(proxy_map, by = c("SNP" = "proxy_snp")) %>%
-#  mutate(
-#    SNP = original_snp,
-#    effect_allele.outcome = original_effect,
-#    other_allele.outcome  = original_other
-#  ) %>%
-#  select(-original_snp, -original_effect, -original_other, -proxy_effect, -proxy_other)
-#pqtl_pd2 <- rbind(pqtl_pd, pqtl_pd_proxy2)
-
 pqtl_pd <- harmonise_data (pqtl_in_pd_clumped, pqtl_pd, action = 2); nrow(pqtl_pd) #25
 pqtl_pd <- pqtl_pd[pqtl_pd$mr_keep==TRUE,]
 
@@ -561,34 +429,6 @@ pd_hetero_list #0.2604085
 
 
 ## Male
-#pdM <- read.table("../../gwas/Sumstats_sexSp/MALE_PD_filtered_sumstats_NO_UKB_AT_ALL_no_multi_allelics_RSID.txt.gz",sep='\t',header=T)
-#pqtl_pdM <- pdM[pdM$SNP %in% pqtl_clumped$SNP,]; nrow(pqtl_pdM) #31
-#pqtl_clumped$SNP[!pqtl_clumped$SNP %in% pdM$SNP]
-#"rs373442750" >> no proxy (rsq>0.8)
-#"rs76086380" >> no proxy (rsq>0.8)
-#"rs72867092" >> no proxy (rsq>0.8)
-#"rs2909447" >> no proxy (rsq>0.8)
-#"rs115450134" >> no proxy (rsq>0.8)
-#"rs35635667" (C/A) >> rs2268889 was taken (rsq=0.987, T/C)
-#"rs76911509" >> no proxy (rsq>0.8)
-#"rs114438602" >> no proxy (rsq>0.8)
-#"rs185584271" (T/C) >> rs78998339 (rsq=0.9279, T/A, eaf.outcome=A 0.977)
-#"rs72871616" >> no proxy (rsq>0.8)
-
-#pqtl_pdM_proxy <- pdM %>%
-#  filter(SNP %in% c("rs2268889","rs78998339"))
-
-# Mapping proxy SNPs back to the original SNPs
-#pqtl_pdM_proxy2 <- pqtl_pdM_proxy %>%
-#  left_join(proxy_map, by = c("SNP" = "proxy_snp")) %>%
-#  mutate(
-#    SNP = original_snp,
-#    effect_allele.outcome = original_effect,
-#    other_allele.outcome  = original_other
-#  ) %>%
-#  select(-original_snp, -original_effect, -original_other, -proxy_effect, -proxy_other)
-#pqtl_pdM2 <- rbind(pqtl_pdM, pqtl_pdM_proxy2)
-
 pqtl_in_pdM <- pqtl %>%
   filter(SNP %in% pdM$SNP)
 pqtl_in_pdM_clumped <- clump_data(pqtl_in_pdM, clump_r2=0.1); nrow(pqtl_in_pdM_clumped)
@@ -622,36 +462,6 @@ pdM_hetero_list # pQTL: 0.5044280
 
 
 ## Female
-#pdF <- read.table("../../gwas/Sumstats_sexSp/FEMALE_PD_filtered_sumstats_NO_UKB_AT_ALL_no_multi_allelics_RSID.txt.gz",sep='\t',header=T)
-#pqtl_pdF <- pdF[pdF$SNP %in% pqtl_clumped$SNP,]; nrow(pqtl_pdF) #31
-#pqtl_clumped$SNP[!pqtl_clumped$SNP %in% pdF$SNP]
-#"rs373442750" >> no proxy (rsq>0.8)
-#"rs76086380" >> no proxy (rsq>0.8)
-#"rs72867092" >> no proxy (rsq>0.8)
-#"rs2909447" >> no proxy (rsq>0.8)
-#"rs115450134" >> no proxy (rsq>0.8)
-#"rs35635667" (C/A) >> rs2268889 was taken (rsq=0.987, T/C)
-#"rs76911509" >> no proxy (rsq>0.8)
-#"rs114438602" >> no proxy (rsq>0.8)?
-#"rs185584271" (T/C) >> rs78998339 (rsq=0.9279, T/A, eaf.outcome=A 0.977)
-#"rs72871616" >> no proxy (rsq>0.8)?
-
-#pqtl_pdF_proxy <- pdF %>%
-#  filter(SNP %in% c("rs2268889","rs78998339"))
-
-# Mapping proxy SNPs back to the original SNPs
-#pqtl_pdF_proxy2 <- pqtl_pdF_proxy %>%
-#  left_join(proxy_map, by = c("SNP" = "proxy_snp")) %>%
-#  mutate(
-#    SNP = original_snp,
-#    effect_allele.outcome = original_effect,
-#    other_allele.outcome  = original_other
-#  ) %>%
-#  select(-original_snp, -original_effect, -original_other, -proxy_effect, -proxy_other)
-#pqtl_pdF2 <- rbind(pqtl_pdF, pqtl_pdF_proxy2)
-#pqtl_pdF <- harmonise_data (pqtl_clumped, pqtl_pdF2, action=2); nrow(pqtl_pdF) #33
-#pqtl_pdF$id.exposure <- "DPP4"
-
 pqtl_in_pdF <- pqtl %>%
   filter(SNP %in% pdF$SNP)
 pqtl_in_pdF_clumped <- clump_data(pqtl_in_pdF, clump_r2=0.1); nrow(pqtl_in_pdF_clumped)
@@ -795,9 +605,6 @@ pqtl_male <- pqtl_male %>%
   mutate(eaf.exposure = ifelse(effect_allele.exposure == A1, MAF, 1 - MAF))
 dim(pqtl_male) #106 18
 
-##pqtl_male <- pqtl_male[pqtl_male$pval.exposure<=0.05,]; nrow(pqtl_male)
-##pqtl_male <- pqtl_male[pqtl_male$pval.exposure<=0.01,]; nrow(pqtl_male)
-#pqtl_male <- pqtl_male[pqtl_male$pval.exposure<=0.00001,]; nrow(pqtl_male) #25
 pqtl_male <- pqtl_male[pqtl_male$pval.exposure<=0.05/nrow(pqtl_male),]; nrow(pqtl_male) #33
 
 pqtl_male$exposure <- "DPP4"
@@ -857,9 +664,6 @@ pqtl_female <- pqtl_female %>%
   mutate(eaf.exposure = ifelse(effect_allele.exposure == A1, MAF, 1 - MAF))
 dim(pqtl_female) #20 20 
 
-##pqtl_female <- pqtl_female[pqtl_female$pval.exposure<=0.05,]; nrow(pqtl_female)
-##pqtl_female <- pqtl_female[pqtl_female$pval.exposure<=0.01,]; nrow(pqtl_female)
-#pqtl_female <- pqtl_female[pqtl_female$pval.exposure<=0.00001,]; nrow(pqtl_female) #20
 pqtl_female <- pqtl_female[pqtl_female$pval.exposure<=0.05/nrow(pqtl_female),]; nrow(pqtl_female) #28
 
 pqtl_female$exposure <- "DPP4"
@@ -901,16 +705,6 @@ write.csv(do.call(rbind, pdF_hetero_list), file="pdF_hetero.csv", row.names = FA
 
 ## 5-2: MR with DM/HbA1c-modifying IV ==========================================
 ## DM > PD
-#dm_all <- extract_instruments(outcomes="ieu-a-26") #DIAGRAM Eur
-#dm_all <- read.table("../../gwas/DIAGRAM.website.GWAS.metabochip.txt", sep="\t", header=T)
-#dm_all$beta <- log(dm_all$OR)
-#dm_all$se <- (log(dm_all$OR_95U) - log(dm_all$OR_95L)) / (2 * 1.96)
-#dm_all <- dm_all[,c("SNPID","CHROMOSOME","POSITION","beta","se",
-#                    "EFFECT_ALLELE","OTHER_ALLELE","P_VALUE","SAMPLE_SIZE")]
-#names(dm_all) <- c("SNP","chr.exposure","pos.exposure","beta.exposure","se.exposure",
-#                "effect_allele.exposure","other_allele.exposure","pval.exposure","samplesize.exposure")
-#dm_all$eaf.exposure <- 0.5
-
 dm_all <- read.table("../../../gwas/DIAMANTE-EUR.sumstat.txt", sep=" ", header=T) 
 dm_all <- dm_all[,c("rsID","chromosome.b37.","position.b37.","Fixed.effects_beta","Fixed.effects_SE",
                     "effect_allele","other_allele","effect_allele_frequency","Fixed.effects_p.value")]
@@ -941,40 +735,6 @@ df.presso <- data.frame(
 pd_mr_list[['dm']] <- rbind(pd_mr_list$dm, df.presso)
 
 
-#dm_all <- read.table("../../gwas/20002_1223.gwas.imputed_v3.both_sexes.sig.tsv", sep="\t", header=T)
-#dm_all <- dm_all[,c("SNP","chr","pos","beta","se",
-#                    "effect_allele","other_allele","eaf","pval","n_complete_samples")]
-#names(dm_all) <- c("SNP","chr.exposure","pos.exposure","beta.exposure","se.exposure",
-#                   "effect_allele.exposure","other_allele.exposure","eaf.exposure","pval.exposure","samplesize.exposure")
-##dm_all <- read_exposure_data("../../E4_DM2.gwas.imputed_v3.both_sexes.sig.tsv", sep="\t",
-##                             snp_col="rsid", chr_col="chr", pos_col="pos",
-##                             beta_col="beta", se_col="se",
-##                             eaf_col="eaf", effect_allele_col="effect_allele", other_allele_col="other_allele",
-##                             pval_col="pval", samplesize_col="n_complete_samples")
-#dm_all_clumped <- clump_data(dm_all, clump_r2 = 0.001, clump_p1=1e-6)
-#dim(dm_all_clumped) #13, 11
-#dm_all_clumped$exposure <- "All T2DM"
-#dm_all_clumped$id.exposure <- "All T2DM"
-##dm_all_clumped$exposure <- "All T2DM (E4)"
-##dm_all_clumped$id.exposure <- "All T2DM (E4)"
-#dm_all_pd <- harmonise_data (dm_all_clumped, pd, action=2)
-#dm_all_pd <- dm_all_pd[dm_all_pd$mr_keep==TRUE,]
-#pd_mr_list[['dm']] <- mr(dm_all_pd, method_list=c("mr_ivw","mr_weighted_median", "mr_weighted_mode", "mr_egger_regression"))
-#presso <- mr_presso(BetaOutcome="beta.outcome",BetaExposure="beta.exposure",SdOutcome="se.outcome",
-#                    SdExposure="se.exposure",SignifThreshold=0.05,OUTLIERtest=TRUE,DISTORTIONtest=TRUE,data=dm_all_pd)$`Main MR results`[1, ]
-#if (!all(is.na(presso[2, c("Causal Estimate", "Sd", "P-value")]))) {
-#  res.presso <- presso[2, ]
-#  method.presso <- "MR-PRESSO"
-#} else {
-#  res.presso <- presso[1, ]
-#  method.presso <- "MR-PRESSO"
-#}
-#df.presso <- data.frame(
-#  id.exposure = unique(dm_all_pd$id.exposure), id.outcome = unique(dm_all_pd$id.outcome), outcome = unique(dm_all_pd$outcome), exposure = unique(dm_all_pd$exposure),
-#  method = method.presso, nsnp = nrow(dm_all_pd), b = res.presso$`Causal Estimate`, se = res.presso$Sd, pval = res.presso$`P-value`
-#)
-#pd_mr_list[['dm']] <- rbind(pd_mr_list$dm, df.presso)
-
 # Male
 dmM <- read.table("../../../gwas/DIAGRAM.Morris2012.SexSpecific.2016JUL05/DIAGRAM.Morris2012.males.txt", sep="\t", header=T)
 dmM$beta <- log(dmM$OR.EFFECT_ALLELE.)
@@ -984,9 +744,8 @@ dmM <- dmM[,c("ID","CHROMOSOME","POSITION","beta","se",
 names(dmM) <- c("SNP","chr.exposure","pos.exposure","beta.exposure","se.exposure",
                 "effect_allele.exposure","other_allele.exposure","pval.exposure")
 dmM$samplesize.exposure <- 20219 + 54604
-dmM$eaf.exposure <- 0.5
-#females (14,621 cases, 60,377
-##dmM <- dmM %>% filter(pval.exposure < 5e-8 & !is.na(pval.exposure) & chr.exposure != "X"); dmM$chr.exposure <- as.integer(dmM$chr.exposure)
+dmM$eaf.exposure <- 0.5 #arbitrarily assiged as the panlindromic SNPs (AT or CG) were already removed
+
 dmM_clumped <- clump_data(dmM, clump_r2 = 0.001, clump_p1=5e-8)
 dim(dmM_clumped) #24, 11
 dmM_clumped$exposure <- "Male T2DM"
@@ -1021,7 +780,8 @@ dmF <- dmF[,c("ID","CHROMOSOME","POSITION","beta","se",
 names(dmF) <- c("SNP","chr.exposure","pos.exposure","beta.exposure","se.exposure",
                 "effect_allele.exposure","other_allele.exposure","pval.exposure")
 dmF$samplesize.exposure <- 14621 + 60377
-dmF$eaf.exposure <- 0.5
+dmF$eaf.exposure <- 0.5 #arbitrarily assiged as the panlindromic SNPs (AT or CG) were already removed
+
 dmF_clumped <- clump_data(dmF, clump_r2 = 0.001, clump_p1=5e-8)
 dim(dmF_clumped) #14, 11
 dmF_clumped$exposure <- "Female T2DM"
@@ -1050,23 +810,10 @@ pdF_mr_list[['dmF']] <- rbind(pdF_mr_list$dmF, df.presso)
 ### DM risk-modifying
 ## eQTL
 # MR with all SNPs in eQTL data
-#eqtl_dmSig <- extract_outcome_data(eqtl$SNP, outcomes="ebi-a-GCST90018926", proxies=TRUE)
-#eqtl_dmSig <- harmonise_data (eqtl, eqtl_dmSig, action=2)
-
 eqtl_dmSig <- harmonise_data(eqtl_clumped, dm_all2, action=3)
 eqtl_dmSig <- eqtl_dmSig[eqtl_dmSig$mr_keep==TRUE,]
 
 # Extract significantly dm-modifying variants
-#eqtl_dmSig_SNP <- mr_singlesnp(eqtl_dmSig, all_method = c("mr_ivw")) %>%
-#  filter(SNP != "All - Inverse variance weighted" & p < 0.05) %>%
-#  select(SNP)
-#eqtl_dmSig <- eqtl %>%
-#  filter(SNP %in% eqtl_dmSig_SNP$SNP); dim(eqtl_dmSig) #2
-#eqtl_dmSig <- eqtl_dmSig[eqtl_dmSig$mr_keep==TRUE,]
-#eqtl_dmSig_clumped <- clump_data(eqtl_dmSig, clump_r2=0.1); nrow(eqtl_dmSig_clumped) #2
-#eqtl_dmSig_pd <- harmonise_data (eqtl_dmSig_clumped, pd, action=2)
-
-# From eqtl_dm
 eqtl_dmSig_SNP <- mr_singlesnp(eqtl_dm, all_method = c("mr_ivw")) %>%
   filter(SNP != "All - Inverse variance weighted" & p < 0.05) %>%
   select(SNP)
@@ -1078,65 +825,19 @@ eqtl_dmSig_pd <- harmonise_data (eqtl_dmSig, pd, action=2)
 eqtl_dmSig_pd <- eqtl_dmSig_pd[eqtl_dmSig_pd$mr_keep==TRUE,]
 eqtl_dmSig_pd$id.exposure <- "eQTLGen_dmSig"
 pd_mr_list[['eQTL_dmSig']] <- mr(eqtl_dmSig_pd, method_list=c("mr_ivw","mr_weighted_median", "mr_weighted_mode", "mr_egger_regression"))
-#presso <- mr_presso(BetaOutcome="beta.outcome",BetaExposure="beta.exposure",SdOutcome="se.outcome",
-#                    SdExposure="se.exposure",SignifThreshold=0.05,OUTLIERtest=TRUE,DISTORTIONtest=TRUE,data=eqtl_dmSig_pd)$`Main MR results`[1, ]
-#if (!all(is.na(presso[2, c("Causal Estimate", "Sd", "P-value")]))) {
-#  res.presso <- presso[2, ]
-#  method.presso <- "MR-PRESSO"
-#} else {
-#  res.presso <- presso[1, ]
-#  method.presso <- "MR-PRESSO"
-#}
-#df.presso <- data.frame(
-#  id.exposure = unique(eqtl_dmSig_pd$id.exposure), id.outcome = unique(eqtl_dmSig_pd$id.outcome), outcome = unique(eqtl_dmSig_pd$outcome), exposure = unique(eqtl_dmSig_pd$exposure),
-#  method = method.presso, nsnp = nrow(eqtl_dmSig_pd), b = res.presso$`Causal Estimate`, se = res.presso$Sd, pval = res.presso$`P-value`
-#)
-#pd_mr_list[['eQTL_dmSig']] <- rbind(pd_mr_list$eQTL_dmSig, df.presso)
 
 # Male
-#eqtl_dmSig_pdM <- harmonise_data (eqtl_dmSig_clumped, pdM, action=2) #
 eqtl_dmSig_pdM <- harmonise_data (eqtl_dmSig, pdM, action=2) #from eqtl_dm
 eqtl_dmSig_pdM <- eqtl_dmSig_pdM[eqtl_dmSig_pdM$mr_keep==TRUE,]
 eqtl_dmSig_pdM$id.exposure <- "eQTLGen_dmSig"
 pdM_mr_list[['eQTL_dmSig']] <- mr(eqtl_dmSig_pdM, method_list=c("mr_ivw","mr_weighted_median", "mr_weighted_mode", "mr_egger_regression"))
 pdM_mr_list[['eQTL_dmSig']] <- mr(eqtl_dmSig_pdM) #from eqtl_dm
-# presso: not enough IVs
-#presso <- mr_presso(BetaOutcome="beta.outcome",BetaExposure="beta.exposure",SdOutcome="se.outcome",
-#                    SdExposure="se.exposure",SignifThreshold=0.05,OUTLIERtest=TRUE,DISTORTIONtest=TRUE,data=eqtl_dmSig_pdM)$`Main MR results`[1, ]
-#if (!all(is.na(presso[2, c("Causal Estimate", "Sd", "P-value")]))) {
-#  res.presso <- presso[2, ]
-#  method.presso <- "MR-PRESSO"
-#} else {
-#  res.presso <- presso[1, ]
-#  method.presso <- "MR-PRESSO"
-#}
-#df.presso <- data.frame(
-#  id.exposure = unique(eqtl_dmSig_pdM$id.exposure), id.outcome = unique(eqtl_dmSig_pdM$id.outcome), outcome = unique(eqtl_dmSig_pdM$outcome), exposure = unique(eqtl_dmSig_pdM$exposure),
-#  method = method.presso, nsnp = nrow(eqtl_dmSig_pdM), b = res.presso$`Causal Estimate`, se = res.presso$Sd, pval = res.presso$`P-value`
-#)
-#pdM_mr_list[['eQTL_dmSig']] <- rbind(pdM_mr_list$eQTL_dmSig, df.presso)
-
 
 # Female
-#eqtl_dmSig_pdF <- harmonise_data (eqtl_dmSig_clumped, pdF, action=2)
 eqtl_dmSig_pdF <- harmonise_data (eqtl_dmSig, pdF, action=2) #from eqtl_dm
 eqtl_dmSig_pdF <- eqtl_dmSig_pdF[eqtl_dmSig_pdF$mr_keep==TRUE,]
 eqtl_dmSig_pdF$id.exposure <- "eQTLGen_dmSig"
 pdF_mr_list[['eQTL_dmSig']] <- mr(eqtl_dmSig_pdF, method_list=c("mr_ivw","mr_weighted_median", "mr_weighted_mode", "mr_egger_regression"))
-#presso <- mr_presso(BetaOutcome="beta.outcome",BetaExposure="beta.exposure",SdOutcome="se.outcome",
-#                    SdExposure="se.exposure",SignifThreshold=0.05,OUTLIERtest=TRUE,DISTORTIONtest=TRUE,data=eqtl_dmSig_pdF)$`Main MR results`[1, ]
-#if (!all(is.na(presso[2, c("Causal Estimate", "Sd", "P-value")]))) {
-#  res.presso <- presso[2, ]
-#  method.presso <- "MR-PRESSO"
-#} else {
-#  res.presso <- presso[1, ]
-#  method.presso <- "MR-PRESSO"
-#}
-#df.presso <- data.frame(
-#  id.exposure = unique(eqtl_dmSig_pdF$id.exposure), id.outcome = unique(eqtl_dmSig_pdF$id.outcome), outcome = unique(eqtl_dmSig_pdF$outcome), exposure = unique(eqtl_dmSig_pdF$exposure),
-#  method = method.presso, nsnp = nrow(eqtl_dmSig_pdF), b = res.presso$`Causal Estimate`, se = res.presso$Sd, pval = res.presso$`P-value`
-#)
-#pdF_mr_list[['eQTL_dmSig']] <- rbind(pdF_mr_list$eQTL_dmSig, df.presso)
 
 
 ## pQTL ######
@@ -1224,23 +925,9 @@ df.presso <- data.frame(
 pdF_mr_list[['pQTL_dmSig']] <- rbind(pdF_mr_list$pQTL_dmSig, df.presso)
 
 
-## Insig
-#eQTL
-# MR with all SNPs in eQTL data
-#eqtl_dmInsig <- extract_outcome_data(eqtl$SNP, outcomes="ebi-a-GCST90018926", proxies=TRUE)
-#eqtl_dmInsig <- harmonise_data (eqtl, eqtl_dmInsig, action=2)
-#eqtl_dmInsig <- eqtl_dmInsig[eqtl_dmInsig$mr_keep==TRUE,]
-
+## Insignificant SNPs with T2DM
+# eQTL
 # Extract Insignificantly dm-modifying variants
-#eqtl_dmInsig_SNP <- mr_singlesnp(eqtl_dmInsig, all_method = c("mr_ivw")) %>%
-#  filter(SNP != "All - Inverse variance weighted" & p > 0.05) %>%
-#  select(SNP)
-#eqtl_dmInsig <- eqtl %>%
-#  filter(SNP %in% eqtl_dmInsig_SNP$SNP); dim(eqtl_dmInsig) #90, 15
-#eqtl_dmInsig_clumped <- clump_data(eqtl_dmInsig, clump_r2=0.1); nrow(eqtl_dmInsig_clumped) #4
-#eqtl_dmInsig_pd <- harmonise_data (eqtl_dmInsig_clumped, pd, action=2)
-
-# From eqtl_dm
 eqtl_dmInsig_SNP <- mr_singlesnp(eqtl_dm, all_method = c("mr_ivw")) %>%
   filter(SNP != "All - Inverse variance weighted" & p > 0.05) %>%
   select(SNP)
@@ -1268,7 +955,6 @@ df.presso <- data.frame(
 pd_mr_list[['eQTL_dmInsig']] <- rbind(pd_mr_list$eQTL_dmInsig, df.presso)
 
 # Male
-#eqtl_dmInsig_pdM <- harmonise_data (eqtl_dmInsig_clumped, pdM, action=2)
 eqtl_dmInsig_pdM <- harmonise_data (eqtl_dmInsig, pdM, action=2) #from eqtl_dm
 eqtl_dmInsig_pdM <- eqtl_dmInsig_pdM[eqtl_dmInsig_pdM$mr_keep==TRUE,]
 eqtl_dmInsig_pdM$id.exposure <- "eQTLGen_dmInsig"
@@ -1291,7 +977,6 @@ pdM_mr_list[['eQTL_dmInsig']] <- rbind(pdM_mr_list$eQTL_dmInsig, df.presso)
 
 
 # Female
-#eqtl_dmInsig_pdF <- harmonise_data (eqtl_dmInsig_clumped, pdF, action=2)
 eqtl_dmInsig_pdF <- harmonise_data (eqtl_dmInsig, pdF, action=2) #from eqtl_dm
 eqtl_dmInsig_pdF <- eqtl_dmInsig_pdF[eqtl_dmInsig_pdF$mr_keep==TRUE,]
 eqtl_dmInsig_pdF$id.exposure <- "eQTLGen_dmInsig"
@@ -1313,20 +998,7 @@ pdF_mr_list[['eQTL_dmInsig']] <- rbind(pdF_mr_list$eQTL_dmInsig, df.presso)
 
 
 ## pQTL ######
-#pqtl_dmInsig <- extract_outcome_data(pqtl$SNP, outcomes="ebi-a-GCST90018926", proxies=TRUE)
-#pqtl_dmInsig <- harmonise_data (pqtl, pqtl_dmInsig, action=2)
-#pqtl_dmInsig <- pqtl_dmInsig[pqtl_dmInsig$mr_keep==TRUE,]
-
 # Extract Insignificantly dm-modifying variants
-#pqtl_dmInsig_SNP <- mr_singlesnp(pqtl_dmInsig, all_method = c("mr_ivw")) %>%
-#  filter(SNP != "All - Inverse variance weighted" & p > 0.05) %>%
-#  select(SNP)
-#pqtl_dmInsig <- pqtl %>%
-#  filter(SNP %in% pqtl_dmInsig_SNP$SNP); dim(pqtl_dmInsig) #118, 13
-#pqtl_dmInsig_clumped <- clump_data(pqtl_dmInsig, clump_r2=0.1); nrow(pqtl_dmInsig_clumped) #10
-#pqtl_dmInsig_pd <- harmonise_data (pqtl_dmInsig_clumped, pd, action=2)
-
-# From pqtl_dm
 pqtl_dmInsig_SNP <- mr_singlesnp(pqtl_dm, all_method = c("mr_ivw")) %>%
   filter(SNP != "All - Inverse variance weighted" & p > 0.05) %>%
   select(SNP)
@@ -1354,7 +1026,6 @@ df.presso <- data.frame(
 pd_mr_list[['pQTL_dmInsig']] <- rbind(pd_mr_list$pQTL_dmInsig, df.presso)
 
 # Male
-#pqtl_dmInsig_pdM <- harmonise_data (pqtl_dmInsig_clumped, pdM, action=2)
 pqtl_dmInsig_pdM <- harmonise_data (pqtl_dmInsig, pdM, action=2) #from pqtl_dm
 pqtl_dmInsig_pdM <- pqtl_dmInsig_pdM[pqtl_dmInsig_pdM$mr_keep==TRUE,]
 pqtl_dmInsig_pdM$id.exposure <- "cis-pQTL_dmInsig"
@@ -1375,7 +1046,6 @@ df.presso <- data.frame(
 pdM_mr_list[['pQTL_dmInsig']] <- rbind(pdM_mr_list$pQTL_dmInsig, df.presso)
 
 # Female
-#pqtl_dmInsig_pdF <- harmonise_data (pqtl_dmInsig_clumped, pdF, action=2)
 pqtl_dmInsig_pdF <- harmonise_data (pqtl_dmInsig, pdF, action=2) #from pqtl_dm
 pqtl_dmInsig_pdF <- pqtl_dmInsig_pdF[pqtl_dmInsig_pdF$mr_keep==TRUE,]
 pqtl_dmInsig_pdF$id.exposure <- "cis-pQTL_dmInsig"
